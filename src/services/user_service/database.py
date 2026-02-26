@@ -1,19 +1,22 @@
 from psycopg2 import pool
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
-connection_pool = pool.ThreadedConnectionPool(
-    minconn=1,
-    maxconn=10,
-    database = "meu_banco",
-    user = "admin",
-    host="users-db",
-    password = "senha123",
-    port=5432
-)
+connection_pool = None
 
 def init_db():
+    global connection_pool
+    connection_pool = pool.ThreadedConnectionPool(
+        minconn=1,
+        maxconn=10,
+        database=os.getenv("DB_NAME", "meu_banco"),
+        user=os.getenv("DB_USER", "admin"),
+        host=os.getenv("DB_HOST", "localhost"),
+        password=os.getenv("DB_PASSWORD", "senha123"),
+        port=int(os.getenv("DB_PORT", 5432))
+    )
     conn = connection_pool.getconn() # pegamos uma das conexões abertas
     try:
         cursor = conn.cursor() # cursor é o que utilizamos para executar queries na conexão aberta
@@ -31,3 +34,22 @@ def init_db():
     finally:
         logger.info("Users table working!")
         connection_pool.putconn(conn) # devolve a conexão emprestada
+        
+def login(username: str, password: str) -> bool:
+    conn = connection_pool.getconn()
+    try:
+        cursor = conn.cursor()
+        logger.info("Looking for user in database")
+        results = cursor.execute(
+            f"""
+                SELECT FROM users WHERE name = %s and password = %s
+            """, username, password
+        )
+        cursor.close()
+        if results:
+            return True
+        else: return False
+    except Exception as E:
+        logger.error(f"Error at searching for user: {E}")
+        return False
+        
