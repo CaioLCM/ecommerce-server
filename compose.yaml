@@ -1,0 +1,13 @@
+services:
+  user_service:
+    build:
+      context: src/services/user_service
+      dockerfile: dockerfile
+    environment:                                                                                                                                                                                             
+        DB_HOST: host.docker.internal                                                                                                                                                                          
+        DB_PORT: 5432                                                                                                                                                                                          
+        DB_NAME: meu_banco                                                                                                                                                                                     
+        DB_USER: admin                                                                                                                                                                                         
+        DB_PASSWORD: senha123                                                                                                                                                                                  
+    ports:                                                                                                                                                                                                   
+        - "8000:8000"   
