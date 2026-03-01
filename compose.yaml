@@ -10,4 +10,13 @@ services:
         DB_USER: admin                                                                                                                                                                                         
         DB_PASSWORD: senha123                                                                                                                                                                                  
     ports:                                                                                                                                                                                                   
-        - "8000:8000"   
+        - "8000:8000"
+
+  api_gateway:
+    build:
+      context: src/services/gateway
+      dockerfile: dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user_service
