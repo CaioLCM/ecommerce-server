@@ -1,6 +1,7 @@
 from psycopg2 import pool
 import logging
 import os
+from passlib.hash import pbkdf2_sha256
 
 logger = logging.getLogger(__name__)
 
@@ -45,12 +46,15 @@ def login(username: str, password: str) -> bool:
         logger.info("Looking for user in database")
         cursor.execute(
             f"""
-                SELECT 1 FROM users WHERE name = %s and password = %s
-            """, (username, password)
+                SELECT 1 FROM users WHERE name = %s
+            """, (username)
         )
         result = cursor.fetchone()
         cursor.close()
-        return result
+        password_db = result[0]
+        if pbkdf2_sha256.verify(password, password_db):
+            return True
+        return False
     except Exception as E:
         logger.error(f"Error at searching for user: {E}")
         return False
@@ -65,7 +69,7 @@ def register(username: str, password: str) -> bool:
         cursor.execute(
             f"""
                 INSERT INTO users (name, password) VALUES (%s, %s)
-            """, (username, password)
+            """, (username, pbkdf2_sha256.hash(password))
         )
         conn.commit()
         cursor.close()

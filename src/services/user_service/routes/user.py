@@ -18,7 +18,7 @@ def handle_login(user: User):
     
 @user_router.post("/register")
 def handle_register(user: User):
-    register(username=user.username, password=user.password)
+    register(username=user.username, password= user.password)
     
 @user_router.put("/update")
 def handle_update():
