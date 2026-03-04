@@ -1,16 +1,24 @@
 services:
+  
+  DB_user:
+    image: postgres15.3:alpine
+    environment:
+      - POSTGRES_USER: admin
+      - POSTGRES_PASSWORD: senha123
+      - POSTGRES_DB: meu_banco
+      
   user_service:
+    depends_on:
+      - DB_user
     build:
       context: src/services/user_service
       dockerfile: dockerfile
     environment:                                                                                                                                                                                             
-        DB_HOST: host.docker.internal                                                                                                                                                                          
+        DB_HOST: DB_user                                                                                                                                                                          
         DB_PORT: 5432                                                                                                                                                                                          
         DB_NAME: meu_banco                                                                                                                                                                                     
         DB_USER: admin                                                                                                                                                                                         
         DB_PASSWORD: senha123                                                                                                                                                                                  
-    ports:                                                                                                                                                                                                   
-        - "8000:8000"
 
   api_gateway:
     build:
